@@ -51,7 +51,7 @@ class Crc(object):
     """
     # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, width, poly, reflect_in, xor_in, reflect_out, xor_out, table_idx_width=None, slice_by=1):
+    def __init__(self, width, poly, reflect_in, xor_in, reflect_out, xor_out, augment=True, table_idx_width=None, slice_by=1):
         """The Crc constructor.
 
         The parameters are as follows:
@@ -61,6 +61,7 @@ class Crc(object):
             xor_in
             reflect_out
             xor_out
+            augment
         """
         # pylint: disable=too-many-arguments
 
@@ -70,6 +71,7 @@ class Crc(object):
         self.xor_in = xor_in
         self.reflect_out = reflect_out
         self.xor_out = xor_out
+        self.augment = augment
         self.tbl_idx_width = table_idx_width
         self.slice_by = slice_by
 
@@ -137,11 +139,12 @@ class Crc(object):
                 if topbit:
                     reg ^= self.poly
 
-        for i in range(self.width):
-            topbit = reg & self.msb_mask
-            reg = ((reg << 1) & self.mask)
-            if topbit:
-                reg ^= self.poly
+        if self.augment:
+            for i in range(self.width):
+                topbit = reg & self.msb_mask
+                reg = ((reg << 1) & self.mask)
+                if topbit:
+                    reg ^= self.poly
 
         if self.reflect_out:
             reg = self.reflect(reg, self.width)
@@ -154,6 +157,10 @@ class Crc(object):
         does not need to loop over the augmented bits, i.e. the Width 0-bits
         wich are appended to the input message in the bit-by-bit algorithm.
         """
+        # Doesn't support not augmenting
+        if not self.augment:
+            raise NotImplementedError("The bit_by_bit_fast does not support un-augmented data")
+
         # If the input data is a string, convert to bytes.
         if isinstance(in_data, str):
             in_data = bytearray(in_data, 'utf-8')
@@ -182,6 +189,10 @@ class Crc(object):
         other than 8.  See the generated C code for tables with different sizes
         instead.
         """
+        # Doesn't support not augmenting
+        if not self.augment:
+            raise NotImplementedError("The bit_by_bit_fast does not support un-augmented data")
+
         table_length = 1 << self.tbl_idx_width
         tbl = [[0 for i in range(table_length)] for j in range(self.slice_by)]
         for i in range(table_length):
