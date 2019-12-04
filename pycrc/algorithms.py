@@ -159,7 +159,7 @@ class Crc(object):
         """
         # Doesn't support not augmenting
         if not self.augment:
-            raise NotImplementedError("The bit_by_bit_fast does not support un-augmented data")
+            raise NotImplementedError("The bit_by_bit_fast() method does not support un-augmented data")
 
         # If the input data is a string, convert to bytes.
         if isinstance(in_data, str):
@@ -191,7 +191,7 @@ class Crc(object):
         """
         # Doesn't support not augmenting
         if not self.augment:
-            raise NotImplementedError("The bit_by_bit_fast does not support un-augmented data")
+            raise NotImplementedError("The table-based method does not support un-augmented data")
 
         table_length = 1 << self.tbl_idx_width
         tbl = [[0 for i in range(table_length)] for j in range(self.slice_by)]
